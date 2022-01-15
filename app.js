@@ -7,17 +7,41 @@
 const express = require('express')
 // 引入cors跨域资源共享
 const cors = require('cors')
+// 引入表单验证中间件
+const joi = require('joi')
 
 // 创建app实列，开启服务器
 const app = express()
 
+//将路由中返回的错误封装为一个函数并挂载到req中
+app.use((req,res,next)=>{
+    res.sendError = (err,status = 1)=>{
+        res.send({
+            status,
+            message:err instanceof Error?err.message:err
+        })
+    }
+    next()
+})
+
 // 配置cors中间件
 app.use(cors())
 // 配置请求体数据解析中间件，解析application/x-www-form-urlencoded类型的数据
-app.use(express.urlencoded({extended:false}))
+app.use(express.urlencoded({ extended: false }))
 
+// 引入并配置用户注册和登录路由
+const loginAndReguserRouter = require('./router/loginAndReguser')
+const Joi = require('joi')
+app.use('/api', loginAndReguserRouter)
 
+//配置错误中间件捕获错误
+app.use((err,req,res,next)=>{
+    // 表单验证失败
+    if(err instanceof Joi.ValidationError) return res.sendError(err)
+    //未知错误
+    res.sendError(err)
+})
 //开启服务器
-app.listen(3007,()=>{
+app.listen(3007, () => {
     console.log('api server running at http://127.0.0.1:3007')
 })
