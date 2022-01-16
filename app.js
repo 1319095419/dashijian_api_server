@@ -14,11 +14,11 @@ const joi = require('joi')
 const app = express()
 
 //将路由中返回的错误封装为一个函数并挂载到req中
-app.use((req,res,next)=>{
-    res.sendError = (err,status = 1)=>{
+app.use((req, res, next) => {
+    res.sendError = (err, status = 1) => {
         res.send({
             status,
-            message:err instanceof Error?err.message:err
+            message: err instanceof Error ? err.message : err
         })
     }
     next()
@@ -29,15 +29,24 @@ app.use(cors())
 // 配置请求体数据解析中间件，解析application/x-www-form-urlencoded类型的数据
 app.use(express.urlencoded({ extended: false }))
 
+// 引入并配置express-jwt中间件，解析token为json对象
+const expressJWT = require('express-jwt')
+const {secretKeyJwt} = require('./option')
+app.use(expressJWT({secret:secretKeyJwt,algorithms: ['HS256']}).unless({path:[/^\/api\//]}))
+
 // 引入并配置用户注册和登录路由
 const loginAndReguserRouter = require('./router/loginAndReguser')
-const Joi = require('joi')
 app.use('/api', loginAndReguserRouter)
+// 引入并配置用户信息路由
+const userRouter = require('./router/user')
+app.use('/my', userRouter)
 
 //配置错误中间件捕获错误
-app.use((err,req,res,next)=>{
+app.use((err, req, res, next) => {
     // 表单验证失败
-    if(err instanceof Joi.ValidationError) return res.sendError(err)
+    if (err instanceof joi.ValidationError) return res.sendError(err)
+    // 捕获身份认证失败的错误(token无效或不存在)
+    if (err.name === 'UnauthorizedError') return res.sendError('身份认证失败')
     //未知错误
     res.sendError(err)
 })
