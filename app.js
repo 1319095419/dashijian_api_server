@@ -31,8 +31,8 @@ app.use(express.urlencoded({ extended: false }))
 
 // 引入并配置express-jwt中间件，解析token为json对象
 const expressJWT = require('express-jwt')
-const {secretKeyJwt} = require('./option')
-app.use(expressJWT({secret:secretKeyJwt,algorithms: ['HS256']}).unless({path:[/^\/api\//]}))
+const { secretKeyJwt } = require('./option')
+app.use(expressJWT({ secret: secretKeyJwt, algorithms: ['HS256'] }).unless({ path: [/^\/api\//] }))
 
 // 引入并配置用户注册和登录路由
 const loginAndReguserRouter = require('./router/loginAndReguser')
@@ -40,6 +40,9 @@ app.use('/api', loginAndReguserRouter)
 // 引入并配置用户信息路由
 const userRouter = require('./router/user')
 app.use('/my', userRouter)
+// 引入并配置文章分类路由
+const artcateRouter = require('./router/artcate')
+app.use('/my/article', artcateRouter)
 
 //配置错误中间件捕获错误
 app.use((err, req, res, next) => {
@@ -50,6 +53,7 @@ app.use((err, req, res, next) => {
     //未知错误
     res.sendError(err)
 })
+
 //开启服务器
 app.listen(3007, () => {
     console.log('api server running at http://127.0.0.1:3007')
