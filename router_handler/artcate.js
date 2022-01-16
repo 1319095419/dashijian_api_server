@@ -21,8 +21,9 @@ exports.getArtcateHandler = (req, res) => {
 // 新增文章分类
 exports.addCatesHandler = (req, res) => {
     // 判断文章分类名称和别名在数据库中是否已经被占用
-    const sql = 'select * from ev_artcates where name=? or alias=?'
-    db.query(sql, [req.body.name, req.body.alias], (err, results) => {
+    const sql = 'select * from ev_artcates where is_delete=? and (name=? or alias=?)'
+    db.query(sql, [0,req.body.name, req.body.alias], (err, results) => {
+        console.log(results);
         if (err) return res.sendError(err) //sql语句执行失败
         if (results.length === 2) return res.sendError('文章名称和别名均已被占用')
         if (results.length === 1 && results[0].name === req.body.name && results[0].alias === req.body.alias) return res.sendError('文章名称和别名均已被占用')
@@ -44,7 +45,7 @@ exports.addCatesHandler = (req, res) => {
 // 根据id删除文章分类
 exports.delCatesByIdHandler = (req, res) => {
     //根据id删除数据库中文章分类数据
-    const sql = 'delete from ev_artcates where Id=?'
+    const sql = 'update ev_artcates set is_delete=1 where id=?'
     db.query(sql, req.params.id, (err, results) => {
         if (err) return res.sendError(err) //sql语句执行失败
         if (results.affectedRows !== 1) return res.sendError('删除文章分类失败')

@@ -29,7 +29,6 @@ exports.reguserHandler = (req, res) => {
         userInfo.password = bcrypt.hashSync(userInfo.password, 10)
         // 将用户注册信息添加到数据库中
         const sql = 'insert into ev_users set ?' //定义sql语句
-        console.log(userInfo);
         db.query(sql, userInfo, (err, results) => {
             if (err) return res.sendError(err) //判断sql语句是否执行成功
             // 判断插入数据是否成功
@@ -55,9 +54,7 @@ exports.loginHandler = (req, res) => {
             return res.sendError('登陆失败') // 用户名不存在，登陆失败
         }
         // 比较用户输入的密码和数据库中的密码是否相同，返回布尔值
-        console.log(userInfo.password,results[0].password);
         const compareResult = bcrypt.compareSync(userInfo.password,results[0].password)
-        console.log(compareResult);
         if (!compareResult) { //两次密码输入不相同
             return res.sendError('输入密码错误')
         }

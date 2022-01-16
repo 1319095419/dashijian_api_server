@@ -34,6 +34,9 @@ const expressJWT = require('express-jwt')
 const { secretKeyJwt } = require('./option')
 app.use(expressJWT({ secret: secretKeyJwt, algorithms: ['HS256'] }).unless({ path: [/^\/api\//] }))
 
+// 为upload文件夹中的文件开启静态资源服务器
+app.use('/uploads', express.static('uploads'))
+
 // 引入并配置用户注册和登录路由
 const loginAndReguserRouter = require('./router/loginAndReguser')
 app.use('/api', loginAndReguserRouter)
@@ -43,6 +46,9 @@ app.use('/my', userRouter)
 // 引入并配置文章分类路由
 const artcateRouter = require('./router/artcate')
 app.use('/my/article', artcateRouter)
+//  引入并配置文章管理路由
+const articleRouter = require('./router/article')
+app.use('/my/article', articleRouter)
 
 //配置错误中间件捕获错误
 app.use((err, req, res, next) => {
