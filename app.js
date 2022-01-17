@@ -29,13 +29,14 @@ app.use(cors())
 // 配置请求体数据解析中间件，解析application/x-www-form-urlencoded类型的数据
 app.use(express.urlencoded({ extended: false }))
 
+
+// 为upload文件夹中的文件开启静态资源服务器，一定放在jwt后面，否则不经过token认证无法访问成功
+app.use('/uploads', express.static('uploads'))
+
 // 引入并配置express-jwt中间件，解析token为json对象
 const expressJWT = require('express-jwt')
 const { secretKeyJwt } = require('./option')
 app.use(expressJWT({ secret: secretKeyJwt, algorithms: ['HS256'] }).unless({ path: [/^\/api\//] }))
-
-// 为upload文件夹中的文件开启静态资源服务器
-app.use('/uploads', express.static('uploads'))
 
 // 引入并配置用户注册和登录路由
 const loginAndReguserRouter = require('./router/loginAndReguser')
@@ -55,7 +56,7 @@ app.use((err, req, res, next) => {
     // 表单验证失败
     if (err instanceof joi.ValidationError) return res.sendError(err)
     // 捕获身份认证失败的错误(token无效或不存在)
-    if (err.name === 'UnauthorizedError') return res.sendError('身份认证失败')
+    if (err.name === 'UnauthorizedError') return res.sendError('身份认证失败！')
     //未知错误
     res.sendError(err)
 })

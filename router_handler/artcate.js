@@ -22,7 +22,7 @@ exports.getArtcateHandler = (req, res) => {
 exports.addCatesHandler = (req, res) => {
     // 判断文章分类名称和别名在数据库中是否已经被占用
     const sql = 'select * from ev_artcates where is_delete=? and (name=? or alias=?)'
-    db.query(sql, [0,req.body.name, req.body.alias], (err, results) => {
+    db.query(sql, [0, req.body.name, req.body.alias], (err, results) => {
         console.log(results);
         if (err) return res.sendError(err) //sql语句执行失败
         if (results.length === 2) return res.sendError('文章名称和别名均已被占用')
@@ -74,8 +74,8 @@ exports.getCateByIdHandler = (req, res) => {
 // 根据id更新文章数据
 exports.updateCateByIdHandler = (req, res) => {
     // 判断文章分类名称和别名在数据库中是否已经被占用
-    const sql = 'select * from ev_artcates where name=? or alias=?'
-    db.query(sql, [req.body.name, req.body.alias], (err, results) => {
+    const sql = 'select * from ev_artcates where Id!=? and is_delete=? and (name=? or alias=?)'
+    db.query(sql, [req.body.Id, 0, req.body.name, req.body.alias], (err, results) => {
         if (err) return res.sendError(err) //sql语句执行失败
         if (results.length === 2) return res.sendError('文章名称和别名均已被占用')
         if (results.length === 1 && results[0].name === req.body.name && results[0].alias === req.body.alias) return res.sendError('文章名称和别名均已被占用')

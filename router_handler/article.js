@@ -27,25 +27,25 @@ exports.addArticleHandler = (req, res) => {
     })
 }
 
-// 获取文章分类列表
+// 获取文章列表
 exports.getArticleListHandler = (req, res) => {
     // 获取到客户发送过来的请求头中的数据
     const query = req.query
     // 根据cate_id和state从数据库中查找数据
-    let whereStr = 'where is_delete=?'
-    let sqlData = [0]
+    let whereStr = 'where is_delete=? and author_id=?'
+    let sqlData = [0, req.user.id]
     if (query.cate_id && query.state) {
-        whereStr = 'where is_delete=? and cate_id=? and state=?'
-        sqlData = [0, query.cate_id, query.state]
+        whereStr = 'where is_delete=? and cate_id=? and state=? and author_id=?'
+        sqlData = [0, query.cate_id, query.state, req.user.id]
     } else if (query.cate_id) {
-        whereStr = 'where is_delete=? and cate_id=?'
-        sqlData = [0, query.cate_id]
+        whereStr = 'where is_delete=? and cate_id=? and author_id=?'
+        sqlData = [0, query.cate_id, req.user.id]
     } else if (query.state) {
-        whereStr = 'where is_delete=? and state=?'
-        sqlData = [0, query.state]
+        whereStr = 'where is_delete=? and state=? and author_id=?'
+        sqlData = [0, query.state, req.user.id]
     }
     const sql = `select Id,title,pub_date,state,cate_id from ev_articles ${whereStr}`
-    console.log(sql);
+    console.log(sql, sqlData);
     db.query(sql, sqlData, (err, results) => {
         if (err) return res.sendError(err) //sql语句执行失败
         // 获取文章分类列表
@@ -111,7 +111,7 @@ exports.getArticleByIdHandler = (req, res) => {
 }
 
 // 根据id更新文章信息
-exports.editArticleByIdHandler = (req,res)=>{
+exports.editArticleByIdHandler = (req, res) => {
     // 拼接好需要添加到数据库中的数据
     const articleData = {
         ...req.body,
@@ -119,12 +119,12 @@ exports.editArticleByIdHandler = (req,res)=>{
     }
     // 更新数据库信息
     const sql = 'update ev_articles set ? where Id=?'
-    db.query(sql,[articleData,req.body.Id],(err,results)=>{
-        if(err) return res.sendError(err) // sql语句执行失败
-        if(results.affectedRows!==1) return res.sendError('文章信息更新失败')
+    db.query(sql, [articleData, req.body.Id], (err, results) => {
+        if (err) return res.sendError(err) // sql语句执行失败
+        if (results.affectedRows !== 1) return res.sendError('文章信息更新失败')
         res.send({
-            status:0,
-            message:'文章信息更新成功',
+            status: 0,
+            message: '文章信息更新成功',
         })
     })
 
